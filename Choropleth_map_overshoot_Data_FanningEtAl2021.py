@@ -2,6 +2,8 @@ import geopandas as gpd
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import PIL
+import io 
 
 # Path to files:
 country_data_path = "Data_Fanning_et_al_2021_shartfallofnations.xlsx"
@@ -36,6 +38,7 @@ for column_name in column_name_lst:
                 zmax=5,
                 name=str(step),
                 visible=False if lst_all_years.index(step) > 0 else True
+                
             )
         )
     frames = [go.Frame(data=[go.Choropleth(
@@ -91,6 +94,33 @@ for column_name in column_name_lst:
     }]
 
     fig.frames = frames
+    gif_frames = []
+    for s, fr in enumerate(fig.frames):
+        # set main traces to appropriate traces within plotly frame
+        fig.update(data=fr.data)
+        fig.update_layout(title=dict(text=f"{column_name} {lst_all_years[s]}", x=0.5, xanchor='center'), annotations=[dict(
+            text="Data from https://goodlife.leeds.ac.uk/", 
+            x=0.02,
+            y=0,
+            xref="paper",
+            yref="paper",
+            showarrow=False)])
+        gif_frames.append(PIL.Image.open(io.BytesIO(fig.to_image(format="png"))))
+
+    # append duplicated last image more times, to keep animation stop at last status
+    for i in range(3):
+        gif_frames.append(gif_frames[-1])
+
+    # create animated GIF
+    gif_frames[0].save(
+            f"gifs/{column_name}_animated.gif",
+            save_all=True,
+            append_images=gif_frames[1:],
+            optimize=False,
+            duration=500,
+            loop=0,
+        )
+
     fig.update_layout(
         updatemenus=updatemenus, 
         sliders=sliders, 
@@ -98,11 +128,11 @@ for column_name in column_name_lst:
         annotations=[dict(
             text="Data from https://goodlife.leeds.ac.uk/", 
             x=0.02,
-            y=-0.03,
+            y=0,
             xref="paper",
             yref="paper",
             showarrow=False)])
     # Save as HTML
-    fig.write_html(f'{column_name}_interactive.html')
-
+    fig.write_html(f'html_files/{column_name}_interactive.html')
+    
 print("Done!")
