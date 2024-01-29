@@ -98,13 +98,13 @@ for column_name in column_name_lst:
     for s, fr in enumerate(fig.frames):
         # set main traces to appropriate traces within plotly frame
         fig.update(data=fr.data)
-        fig.update_layout(title=dict(text=f"{column_name} {lst_all_years[s]}", x=0.5, xanchor='center'), annotations=[dict(
+        fig.update_layout(title=dict(text=f"{column_name} Overshoot by Country in {lst_all_years[s]}", x=0.5, xanchor='center'), annotations=[dict(
             text="Data from https://goodlife.leeds.ac.uk/", 
             x=0.02,
             y=0,
             xref="paper",
             yref="paper",
-            showarrow=False)])
+            showarrow=False)], width=1200, height=800)
         gif_frames.append(PIL.Image.open(io.BytesIO(fig.to_image(format="png"))))
 
     # append duplicated last image more times, to keep animation stop at last status
@@ -131,7 +131,8 @@ for column_name in column_name_lst:
             y=0,
             xref="paper",
             yref="paper",
-            showarrow=False)])
+            showarrow=False)],
+            )
     # Save as HTML
     fig.write_html(f'html_files/{column_name}_interactive.html')
     
